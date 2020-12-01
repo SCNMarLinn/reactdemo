@@ -5,34 +5,31 @@ import './App.css';
 
 
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      done      : Array(3).fill(false),
+      openTasks : 3,
+    };
+  }
   render() {
-    const openTasks = 5;
     return (
       <div id="App">
-        <h1>ToDos ({openTasks} offen)</h1>
-        <TaskList />
+        <h1>ToDos ({this.state.openTasks} offen)</h1>
+        <TaskList done={this.state.done} toggleState={this.toggleState()} />
         <footer>
           <button>Neue Aufgabe</button>
          </footer>
       </div>
     );
-/*
-    return React.createElement('div',null,{
-      React.createElement('h1',null,null),
-      React.createElement(TaskList,null,null),
-      React.createElement('footer',null,{
-        React.createElement('button',null,null)
-      }
-    });
-*/
-    /*
-      <div id="App">
-        <TaskHeader />
-        <TaskList />
-        <TaskFooter />
-      </div>
-
-    */
+  }
+  toggleState() {
+    return taskID => {
+      const doneCopy = this.state.done.slice();
+      doneCopy[taskID] = !doneCopy[taskID];
+      this.setState({ done: doneCopy });
+      this.setState({ openTasks: this.state.openTasks + ( doneCopy[taskID] ? -1 : 1 ) });
+    };
   }
 }
 
@@ -45,9 +42,9 @@ class TaskList extends React.Component {
   render() {
     return (
       <ul>
-        <Task />
-        <Task />
-        <Task />
+        <Task taskID='0' done={this.props.done[0]} clickHandler = {() => { this.props.toggleState(0) }} />
+        <Task taskID='1' done={this.props.done[1]} clickHandler = {() => { this.props.toggleState(1) }} />
+        <Task taskID='2' done={this.props.done[2]} clickHandler = {() => { this.props.toggleState(2) }} />
       </ul>
       );
   }
@@ -59,27 +56,13 @@ TaskList.propTypes = {
 
 
 class Task extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      done: false,
-    };
-  }
   render() {
-    const message      = this.state.done ? "+" : "-";
-//    const message      = "<script>alert('boo')</script>";
-    const isChecked    = this.state.done ? "checked" : "";
-/*
-    const clickHandler = this.state.done ? () => { return; } 
-                                         : () => { this.setState({ done: true }) }
-                         ;
-*/
-    const clickHandler = () => { this.setState({ done: !this.state.done }) };
+    const isChecked    = this.props.done ? "checked" : "";
     return (
       <li>
-        {message}
+        {this.props.taskID}
         <label>
-          <input type="checkbox" checked={isChecked} onClick={clickHandler} />
+          <input type="checkbox" checked={isChecked} onClick={this.props.clickHandler} />
         </label>
         <span>Aufgabe</span>
       </li>
