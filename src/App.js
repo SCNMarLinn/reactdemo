@@ -42,11 +42,18 @@ class TaskList extends React.Component {
   render() {
     return (
       <ul>
-        <Task taskID='0' done={this.props.done[0]} clickHandler = {() => { this.props.toggleState(0) }} />
-        <Task taskID='1' done={this.props.done[1]} clickHandler = {() => { this.props.toggleState(1) }} />
-        <Task taskID='2' done={this.props.done[2]} clickHandler = {() => { this.props.toggleState(2) }} />
+        {this.renderTask(0)}
+        {this.renderTask(1)}
+        {this.renderTask(2)}
       </ul>
       );
+  }
+  renderTask(taskID) {
+    return (
+      <Task taskID       = {taskID}
+            done         = {this.props.done[taskID]}
+            clickHandler = { () => { this.props.toggleState(taskID) }} />
+    );
   }
 }
 
@@ -55,21 +62,18 @@ TaskList.propTypes = {
 };
 
 
-class Task extends React.Component {
-  render() {
-    const isChecked    = this.props.done ? "checked" : "";
+function Task(props) {
+    const isChecked    = props.done ? "checked" : "";
     return (
       <li>
-        {this.props.taskID}
+        {props.taskID}
         <label>
-          <input type="checkbox" checked={isChecked} onClick={this.props.clickHandler} />
+          <input type="checkbox" checked={isChecked} onClick={props.clickHandler} />
         </label>
         <span>Aufgabe</span>
       </li>
     );
-  }
 }
-//             <input type="checkbox" onClick={() => this.setState({ done: true }) } />
 
 Task.propTypes = {
     
