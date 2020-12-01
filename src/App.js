@@ -9,6 +9,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       done      : Array(3).fill(false),
+      tasks     : Array(3).fill(null),
       openTasks : 3,
     };
   }
@@ -16,7 +17,7 @@ class App extends React.Component {
     return (
       <div id="App">
         <h1>ToDos ({this.state.openTasks} offen)</h1>
-        <TaskList done={this.state.done} toggleState={this.toggleState()} />
+        <TaskList done={this.state.done} toggleState={this.toggleState()} tasks={this.state.tasks}/>
         <footer>
           <button>Neue Aufgabe</button>
          </footer>
@@ -37,24 +38,47 @@ App.propTypes = {
   logo: PropTypes.number
 };
 
+/*
+class ToDo {
+  description;
+  dueDate;
+  isDone;
+}
+*/
 
 class TaskList extends React.Component {
   render() {
+    const tasks = this.props.tasks.map( (task,taskID) => {
+        return this.renderTask(task,taskID);
+    });
+    // const tasks = this.props.tasks.map(this.renderTask);
+
     return (
       <ul>
-        {this.renderTask(0)}
-        {this.renderTask(1)}
-        {this.renderTask(2)}
+        {tasks}
       </ul>
-      );
+    );
   }
-  renderTask(taskID) {
+ 
+  renderTask(task,taskID) {
     return (
       <Task taskID       = {taskID}
             done         = {this.props.done[taskID]}
             clickHandler = { () => { this.props.toggleState(taskID) }} />
     );
   }
+}
+
+function TaskList2(props) {
+  const tasks = props.tasks.map( (task,taskID) => {
+    return (
+      <Task taskID       = { taskID }
+            done         = { props.done[taskID] }
+            clickHandler = { () => { props.toggleState(taskID) } } />
+    );
+  });
+
+  return (<ul> {tasks} </ul>);
 }
 
 
