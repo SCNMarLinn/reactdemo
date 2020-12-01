@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 // import logo from './logo.svg';
 import './App.css';
 
 
-class App extends React.Component {
+
+class App2 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -33,6 +34,43 @@ class App extends React.Component {
     };
   }
 }
+
+
+// const App2 = props => {
+function App(props) {
+
+    const [openTasks,setOpenTasks] = useState(3);
+    const [done,setDone]           = useState(Array(3).fill(false));
+    const [tasks,setTasks]         = useState(Array(3).fill(null));
+
+    const toggleState = taskID => {
+      done[taskID] = !done[taskID];
+      setDone(done);
+      setOpenTasks(openTasks + ( done[taskID] ? -1 : 1 ) );
+    };
+
+    return (
+      <div id="App">
+        <h1>ToDos ({openTasks} offen)</h1>
+        <TaskList done={done} toggleState={toggleState} tasks={tasks}/>
+        <footer>
+          <button>Neue Aufgabe</button>
+         </footer>
+      </div>
+    );
+}
+
+/*
+function toggleState(taskID) {
+  const [done,setDone] = useState(Array(3).fill(false));
+  done[taskID] = !done[taskID];
+  setDone(done);
+
+  const [openTasks,setOpenTasks] = useState(3);
+  setOpenTasks(openTasks + ( done[taskID] ? -1 : 1 ) );
+};
+*/
+
 
 App.propTypes = {
   logo: PropTypes.number
