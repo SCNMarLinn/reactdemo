@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Formik, useFormik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import './App.css';
 
@@ -77,7 +79,7 @@ function Task(props) {
 }
 
 
-function NewTask(props) {
+function NewTask2(props) {
 
   const [currentText,setText] = useState("");
 
@@ -89,6 +91,110 @@ function NewTask(props) {
       </label>
       <button onClick={ () => props.handleNewTask(currentText) } >+</button>
     </footer>
+  );
+}
+
+function NewTask3(props) {
+
+  const validate = (values) => {
+    const errors = {};
+    if (values.todoName.length < 6) {
+      errors.todoName = 'Name zu kurz';
+    }
+    if (!/^[a-zA-Z]*$/i.test(values.todoName)) {
+      errors.somethingRandom = 'Darf nur aus Buchstaben bestehen';
+    }
+    return errors;
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      todoName: "",
+    },
+    validate,
+    onSubmit: (values) => {
+      props.handleNewTask(values.todoName);
+    },
+  });
+
+  return (
+    <form onSubmit={ formik.handleSubmit } >
+      <label>
+      { formik.errors.todoName
+        ? <div class="error"> { formik.errors.todoName } </div>
+        : null
+      }
+      { formik.errors.somethingRandom
+        ? <div class="error"> { formik.errors.somethingRandom } </div>
+        : null
+      }
+      Neu:
+        <input type="text"
+               name="todoName"
+               value={ formik.values.todoName }
+               onChange={ formik.handleChange }
+               onBlur={ formik.handleBlur }/>
+      </label>
+      <button type="submit">+</button>
+    </form>
+  );
+}
+
+function NewTask4(props) {
+
+  const formik = useFormik({
+    initialValues: {
+      todoName: "",
+    },
+    validationSchema: Yup.object({
+      todoName: Yup.string().min(7,'Zu kurz').required('muss angegeben werden'),
+    }),
+    onSubmit: (values) => {
+      props.handleNewTask(values.todoName);
+    },
+  });
+
+  return (
+    <form onSubmit={ formik.handleSubmit } >
+      <label>
+      { formik.touched.todoName && formik.errors.todoName
+        ? <div class="error"> { formik.errors.todoName } </div>
+        : null
+      }
+      Neu:
+        <input { ...formik.getFieldProps('todoName') } />
+      </label>
+      <button type="submit">+</button>
+    </form>
+  );
+}
+
+function NewTask(props) {
+
+  return (
+    <Formik
+      initialValues= { {
+         todoName: "",
+        }}
+      validationSchema= {
+        Yup.object({
+          todoName: Yup.string().min(7,'Zu kurz').required('muss angegeben werden'),
+        }) }
+      onSubmit= {
+        (values) => { props.handleNewTask(values.todoName); }
+      }
+    >
+    { formik => (
+        <Form>
+          <div class="error">
+            <ErrorMessage name="todoName"/>
+          </div>
+          <label htmlForm="todoName">Neu:</label>
+          <Field name="todoName" type="text" />
+          <button type="submit">+</button>
+        </Form>
+    ) }
+    </Formik>
   );
 }
 
