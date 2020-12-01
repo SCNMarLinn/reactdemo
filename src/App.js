@@ -14,23 +14,30 @@ function App(props) {
       document.title = `${openTasks} Aufgaben offen`;
       return function cleanup() {}
     } );
+    /*
     useEffect( function onRender() {
       document.title = `${openTasks} Aufgaben offen`;
     } );
-
+    */
     const toggleState = taskID => {
       done[taskID] = !done[taskID];
       setDone(done);
       setOpenTasks(openTasks + ( done[taskID] ? -1 : 1 ) );
     };
 
+    const handleNewTask = (newTask) => {
+      tasks.push(newTask);
+      setTasks(tasks);
+      setOpenTasks(openTasks + 1);
+      done.push(false);
+      setDone(done);
+    };
+
     return (
       <div id="App">
         <h1>ToDos ({openTasks} offen)</h1>
         <TaskList done={done} toggleState={toggleState} tasks={tasks}/>
-        <footer>
-          <button>Neue Aufgabe</button>
-         </footer>
+        <NewTask handleNewTask={handleNewTask} />
       </div>
     );
 }
@@ -67,6 +74,22 @@ function Task(props) {
         <span>Aufgabe</span>
       </li>
     );
+}
+
+
+function NewTask(props) {
+
+  const [currentText,setText] = useState("");
+
+  return (
+    <footer>
+      <label>
+      Neu:
+        <input type="text" value={ currentText } onChange={ (event) => setText(event.target.value) } />
+      </label>
+      <button onClick={ () => props.handleNewTask(currentText) } >+</button>
+    </footer>
+  );
 }
 
 export default App;
