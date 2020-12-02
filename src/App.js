@@ -72,6 +72,16 @@ class ErrorBoundary extends React.Component {
           />
         </React.Fragment>
       );
+/*
+      return (
+        <React.Fragment>
+          <h1>ToDos ({this.props.openTasks} offen)</h1>
+          { dynamicList(Task,"tasks") }
+          <NewTask 
+            handleNewTask={this.props.handleNewTask}
+          />
+        </React.Fragment>
+*/
     }
   }
   componentDidCatch(error,errorInfo) {
@@ -102,6 +112,8 @@ class ErrorBoundaryIdeal extends React.Component {
     return { hasError: true };
   }
 }
+
+
 /*
 class ToDo {
   description;
@@ -109,6 +121,22 @@ class ToDo {
   isDone;
 }
 */
+
+
+function dynamicList(Component,listName) {
+  
+//  const {listName,maxSize,usePagination,...childProps} = props;
+
+  return ( (props) => {
+    const children = props[listName].map( (elem,elemID) => {
+      return (
+        <Component {...props}  elemID={elemID} />
+      );
+    });
+
+    return (<ul> {children} </ul>);
+  });
+}
 
 function TaskList(props) {
   const tasks = props.tasks.map( (task,taskID) => {
@@ -228,7 +256,7 @@ function NewTask4(props) {
 
 function NewTask(props) {
 
-  throw new Error('bang');
+  // throw new Error('bang');
 
   return (
     <Formik
@@ -247,7 +275,6 @@ function NewTask(props) {
         <Form>
           <div class="error">
             <ErrorMessage name="todoName"/>
-            }
           </div>
           <label htmlForm="todoName">Neu:</label>
           <Field name="todoName" type="text" />
