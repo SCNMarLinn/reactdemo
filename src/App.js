@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import './App.css';
 import { Tasks, NewTask, Task } from './Tasks.js';
 import Projects from './Projects.js';
+import { Button, Container, Row, Col, Nav } from 'react-bootstrap';
 import {
     BrowserRouter as Router,
     Switch,
@@ -17,19 +18,23 @@ import {
 function App(props) {
     return (
       <Router>
-        <nav>
-          <ul>
-            <li>
+        <Nav>
+          <Nav.Item>
+            <Nav.Link>
               <Link to='/planning'>Planung</Link>
-            </li>
-            <li>
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link>
               <Link to='/test'>Test</Link>
-            </li>
-            <li>
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link>
               <Link to='/files'>Dateien</Link>
-            </li>
-          </ul>
-        </nav>
+            </Nav.Link>
+          </Nav.Item>
+        </Nav>
 
         <Switch>
           <Route path='/planning'>

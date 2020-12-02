@@ -3,6 +3,8 @@ import { Formik, useFormik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import './App.css';
+import { Button, Container, Row, Col } from 'react-bootstrap';
+import { Form as BSForm } from 'react-bootstrap';
 
 // const App2 = props => {
 function Tasks(props) {
@@ -165,19 +167,29 @@ function TaskList(props) {
     );
   });
 
-  return (<ul> {tasks} </ul>);
+  return (
+    <Container>
+      {tasks}
+    </Container>
+  );
 }
 
 function Task(props) {
     const isChecked    = props.done ? "checked" : "";
     return (
-      <li>
-        {props.taskID}
-        <label>
-          <input type="checkbox" checked={isChecked} onClick={props.clickHandler} />
-        </label>
-        <span>Aufgabe</span>
-      </li>
+      <Row>
+        <Col>
+          {props.taskID}
+        </Col>  
+        <Col>
+          <label>
+            <BSForm.Check checked={isChecked} onClick={props.clickHandler} />
+          </label>
+        </Col>
+        <Col>
+          <span>Aufgabe</span>
+        </Col>
+      </Row>
     );
 }
 
@@ -300,7 +312,7 @@ function NewTask4(props) {
   );
 }
 
-function NewTask(props) {
+function NewTask5(props) {
 
   // throw new Error('bang');
 
@@ -322,12 +334,48 @@ function NewTask(props) {
           <div class="error">
             <ErrorMessage name="todoName"/>
           </div>
-          <label htmlForm="todoName">Neu:</label>
+          <BSForm.Label htmlForm="todoName">Neu:</BSForm.Label>
           <Field name="todoName" type="text" />
-          <button type="submit">+</button>
+          <Button variant='primary' type="submit">+</Button>
         </Form>
     ) }
     </Formik>
+  );
+}
+
+function NewTask(props) {
+  const formik = useFormik({
+    initialValues: {
+      todoName: "",
+    },
+    validationSchema: Yup.object({
+      todoName: Yup.string().min(7,'Zu kurz').required('muss angegeben werden'),
+    }),
+    onSubmit: (values) => {
+      props.handleNewTask(values.todoName);
+    },
+  });
+
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <BSForm onSubmit={ formik.handleSubmit } >
+          <BSForm.Group>
+            <BSForm.Label>
+            { formik.touched.todoName && formik.errors.todoName
+              ? <div class="error"> { formik.errors.todoName } </div>
+              : null
+            }
+            Neu:
+            </BSForm.Label>
+            <BSForm.Control { ...formik.getFieldProps('todoName') } />
+          </BSForm.Group>
+          <Button type="submit">+</Button>
+          </BSForm>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
