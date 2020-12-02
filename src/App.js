@@ -138,6 +138,24 @@ function dynamicList(Component,listName) {
   });
 }
 
+function DynamicList(Component,listName) {
+  
+//  const {listName,maxSize,usePagination,...childProps} = props;
+
+  return ( (props) => {
+
+    const children = props[listName].map( (elem,elemID) => {
+      
+      const comp = new Component();
+      comp.props = props;
+      comp.props.elemID = elemID;
+      return comp.render();
+    });
+
+    return (<ul> {children} </ul>);
+  });
+}
+
 function TaskList(props) {
   const tasks = props.tasks.map( (task,taskID) => {
     return (
@@ -166,18 +184,45 @@ function Task(props) {
 
 function NewTask2(props) {
 
-  const [currentText,setText] = useState("");
+  const MyInput = React.forwardRef( (props,ref) => {
+    return <NewTaskInput />
+  });
+
+  const inputRef = React.createRef();
 
   return (
     <footer>
-      <label>
-      Neu:
-        <input type="text" value={ currentText } onChange={ (event) => setText(event.target.value) } />
-      </label>
-      <button onClick={ () => props.handleNewTask(currentText) } >+</button>
+      <MyInput />
+      <NewTaskButton input={inputRef} handleNewTask={ props.handleNewTask } />
     </footer>
   );
 }
+
+function NewTaskInput(props) {
+
+  return (
+      <label>
+      Neu:
+        <input type="text" />
+      </label>
+  );
+}
+
+function NewTaskButton(props) {
+ 
+  useEffect( () => 
+    { console.log(props.input); }
+  );
+
+  // const currentText = props.input.current.value;
+  const currentText = "";
+
+  return (    
+      <button onClick={ () => props.handleNewTask(currentText) } >+</button>
+  );
+}
+
+
 
 function NewTask3(props) {
 
