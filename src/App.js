@@ -36,15 +36,72 @@ function App(props) {
     };
 
     return (
-      <div id="App">
-        <h1>ToDos ({openTasks} offen)</h1>
-        <TaskList done={done} toggleState={toggleState} tasks={tasks}/>
-        <NewTask handleNewTask={handleNewTask} />
-      </div>
+      <ErrorBoundary
+        done={done}
+        toggleState={toggleState}
+        tasks={tasks}
+        handleNewTask={handleNewTask}
+        openTasks={openTasks}
+        />
     );
 }
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasError: false,
+    };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div> Error! </div>
+      );
+    } else {
+      return (
+        <React.Fragment>
+          <h1>ToDos ({this.props.openTasks} offen)</h1>
+          <TaskList
+            done={this.props.done}
+            toggleState={this.props.toggleState}
+            tasks={this.props.tasks}
+          />
+          <NewTask 
+            handleNewTask={this.props.handleNewTask}
+          />
+        </React.Fragment>
+      );
+    }
+  }
+  componentDidCatch(error,errorInfo) {
+    this.state = { hasError: true };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+}
 
+
+class ErrorBoundaryIdeal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasError: false
+    };
+  }
+  render() {
+    return (
+      <TaskList { ...this.props } />
+    );
+  }
+  componentDidCatch(error,errorInfo) {
+    this.state = { hasError: true };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+}
 /*
 class ToDo {
   description;
@@ -171,6 +228,8 @@ function NewTask4(props) {
 
 function NewTask(props) {
 
+  throw new Error('bang');
+
   return (
     <Formik
       initialValues= { {
@@ -188,6 +247,7 @@ function NewTask(props) {
         <Form>
           <div class="error">
             <ErrorMessage name="todoName"/>
+            }
           </div>
           <label htmlForm="todoName">Neu:</label>
           <Field name="todoName" type="text" />
