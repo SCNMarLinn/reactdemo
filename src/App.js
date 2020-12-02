@@ -1,332 +1,182 @@
 import React, { useState, useEffect } from 'react';
-import { Formik, useFormik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import './App.css';
+import { Tasks, NewTask, Task } from './Tasks.js';
+import Projects from './Projects.js';
+import {
+    BrowserRouter as Router,
+    Switch,
+    Route,
+    Link,
+    Redirect,
+    useRouteMatch,
+    useParams,
+    useLocation
+  } from 'react-router-dom';
 
-// const App2 = props => {
 function App(props) {
-
-    const [openTasks,setOpenTasks] = useState(3);
-    const [done,setDone]           = useState(Array(3).fill(false));
-    const [tasks,setTasks]         = useState(Array(3).fill(null));
-
-
-    useEffect( function onRender() {
-      document.title = `${openTasks} Aufgaben offen`;
-      return function cleanup() {}
-    } );
-    /*
-    useEffect( function onRender() {
-      document.title = `${openTasks} Aufgaben offen`;
-    } );
-    */
-    const toggleState = taskID => {
-      done[taskID] = !done[taskID];
-      setDone(done);
-      setOpenTasks(openTasks + ( done[taskID] ? -1 : 1 ) );
-    };
-
-    const handleNewTask = (newTask) => {
-      tasks.push(newTask);
-      setTasks(tasks);
-      setOpenTasks(openTasks + 1);
-      done.push(false);
-      setDone(done);
-    };
-
     return (
-      <ErrorBoundary
-        done={done}
-        toggleState={toggleState}
-        tasks={tasks}
-        handleNewTask={handleNewTask}
-        openTasks={openTasks}
-        />
+      <Router>
+        <nav>
+          <ul>
+            <li>
+              <Link to='/planning'>Planung</Link>
+            </li>
+            <li>
+              <Link to='/test'>Test</Link>
+            </li>
+            <li>
+              <Link to='/files'>Dateien</Link>
+            </li>
+          </ul>
+        </nav>
+
+        <Switch>
+          <Route path='/planning'>
+            <Planning/>
+          </Route>
+          <Route path='/files'>
+            <Files/>
+          </Route>
+
+          <Route path='/planung'>
+            <Redirect to='/planning' />
+          </Route>
+
+          <Route path='/:taskID'>
+            <RedirectToTask/>
+          </Route>
+
+          <Route exact path='/'>
+            <h1>Hello World</h1>
+          </Route>
+          <Route path='*'>
+            <div>
+              <h1>404 not found</h1>
+            </div>
+          </Route>
+        </Switch>
+      </Router>
     );
 }
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hasError: false,
-    };
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div> Error! </div>
-      );
-    } else {
-      return (
-        <React.Fragment>
-          <h1>ToDos ({this.props.openTasks} offen)</h1>
-          <TaskList
-            done={this.props.done}
-            toggleState={this.props.toggleState}
-            tasks={this.props.tasks}
-          />
-          <NewTask 
-            handleNewTask={this.props.handleNewTask}
-          />
-        </React.Fragment>
-      );
 /*
-      return (
-        <React.Fragment>
-          <h1>ToDos ({this.props.openTasks} offen)</h1>
-          { dynamicList(Task,"tasks") }
-          <NewTask 
-            handleNewTask={this.props.handleNewTask}
-          />
-        </React.Fragment>
+/planning/tasks
+/planning/projects
+/files
 */
-    }
-  }
-  componentDidCatch(error,errorInfo) {
-    this.state = { hasError: true };
-  }
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
+
+function RedirectToTask(props) {
+  let { taskID } = useParams();
+  const match    = useRouteMatch();
+
+  return (
+    <Redirect to={ `/planning/task/${taskID}` } />
+  );
 }
 
+function Planning(props) {
 
-class ErrorBoundaryIdeal extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hasError: false
-    };
+  const match =  useRouteMatch();
+
+  return (
+      <Router>
+        <nav>
+          <ul>
+            <li>
+              <Link to={ `${match.path}/tasks` }>Aufgaben</Link>
+            </li>
+            <li>
+              <Link to={ `${match.path}/projects` }>Projekte</Link>
+            </li>
+            <li>
+              <Link to={ `${match.path}/task/new` }>Neue Aufgabe</Link>
+            </li>            
+            <li>
+              <Link to={ `${match.path}/task/next` }>Nächste Aufgabe</Link>
+            </li>
+          </ul>
+        </nav>
+
+        <Switch>
+
+          <Route path={ `${match.path}/tasks/:isDone` } children={ <FilteredTasks/> } />
+
+          <Route path={ `${match.path}/tasks` } >
+            <Tasks/>
+          </Route>
+          <Route path={ `${match.path}/projects` }>
+            <Projects/>
+          </Route>
+          <Route path={ `${match.path}/task/new` } children={ <NewTaskWrapper/> } />
+          <Route path={ `${match.path}/task/next` } children={ <SingleTask/> } />
+          <Route path={ `${match.path}/task/:taskID` } children={ <SingleTask/> } />
+          <Route exact path={ match.path }>
+            <h1>Hello Planning</h1>
+          </Route>
+          <Route path='*'>
+            <div>
+              <h1>404 not found</h1>
+            </div>
+          </Route>
+        </Switch>
+      </Router>
+  );
+}
+
+function FilteredTasks(props) {
+  let { isDone } = useParams();
+  return (
+    <React.Fragment>
+      <hr/>
+      <div> Zeige nur Aufgaben, die { isDone==='true' ? '' : 'nicht' } erledigt sind.</div>
+      <Tasks/>
+    </React.Fragment>
+  );
+}
+
+function NewTaskWrapper(props) {
+  return (
+    <NewTask handleNewTask={ null } />
+  );
+}
+
+function SingleTask(props) {
+
+  let { taskID } = useParams();
+
+  if (taskID === null){
+    taskID = 0;
   }
-  render() {
+
+  if ( taskID > 3 ) {
     return (
-      <TaskList { ...this.props } />
+      <React.Fragment>
+        <p class="error">Keine Aufgabe mit ID { taskID } gefunden</p>
+      </React.Fragment>
     );
   }
-  componentDidCatch(error,errorInfo) {
-    this.state = { hasError: true };
-  }
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-}
 
-
-/*
-class ToDo {
-  description;
-  dueDate;
-  isDone;
-}
-*/
-
-
-function dynamicList(Component,listName) {
-  
-//  const {listName,maxSize,usePagination,...childProps} = props;
-
-  return ( (props) => {
-    const children = props[listName].map( (elem,elemID) => {
-      return (
-        <Component {...props}  elemID={elemID} />
-      );
-    });
-
-    return (<ul> {children} </ul>);
-  });
-}
-
-function DynamicList(Component,listName) {
-  
-//  const {listName,maxSize,usePagination,...childProps} = props;
-
-  return ( (props) => {
-
-    const children = props[listName].map( (elem,elemID) => {
-      
-      const comp = new Component();
-      comp.props = props;
-      comp.props.elemID = elemID;
-      return comp.render();
-    });
-
-    return (<ul> {children} </ul>);
-  });
-}
-
-function TaskList(props) {
-  const tasks = props.tasks.map( (task,taskID) => {
-    return (
+  return (
+    <React.Fragment>
       <Task taskID       = { taskID }
-            done         = { props.done[taskID] }
-            clickHandler = { () => { props.toggleState(taskID) } } />
-    );
-  });
+            done         = { true }
+            clickHandler = { null } />
+    </React.Fragment>
+  );
 
-  return (<ul> {tasks} </ul>);
-}
-
-function Task(props) {
-    const isChecked    = props.done ? "checked" : "";
-    return (
-      <li>
-        {props.taskID}
-        <label>
-          <input type="checkbox" checked={isChecked} onClick={props.clickHandler} />
-        </label>
-        <span>Aufgabe</span>
-      </li>
-    );
 }
 
 
-function NewTask2(props) {
-
-  const MyInput = React.forwardRef( (props,ref) => {
-    return <NewTaskInput />
-  });
-
-  const inputRef = React.createRef();
-
+function Files(props) {
   return (
-    <footer>
-      <MyInput />
-      <NewTaskButton input={inputRef} handleNewTask={ props.handleNewTask } />
-    </footer>
-  );
-}
-
-function NewTaskInput(props) {
-
-  return (
-      <label>
-      Neu:
-        <input type="text" />
-      </label>
-  );
-}
-
-function NewTaskButton(props) {
- 
-  useEffect( () => 
-    { console.log(props.input); }
-  );
-
-  // const currentText = props.input.current.value;
-  const currentText = "";
-
-  return (    
-      <button onClick={ () => props.handleNewTask(currentText) } >+</button>
-  );
-}
-
-
-
-function NewTask3(props) {
-
-  const validate = (values) => {
-    const errors = {};
-    if (values.todoName.length < 6) {
-      errors.todoName = 'Name zu kurz';
-    }
-    if (!/^[a-zA-Z]*$/i.test(values.todoName)) {
-      errors.somethingRandom = 'Darf nur aus Buchstaben bestehen';
-    }
-    return errors;
-  };
-
-  const formik = useFormik({
-    initialValues: {
-      todoName: "",
-    },
-    validate,
-    onSubmit: (values) => {
-      props.handleNewTask(values.todoName);
-    },
-  });
-
-  return (
-    <form onSubmit={ formik.handleSubmit } >
-      <label>
-      { formik.errors.todoName
-        ? <div class="error"> { formik.errors.todoName } </div>
-        : null
-      }
-      { formik.errors.somethingRandom
-        ? <div class="error"> { formik.errors.somethingRandom } </div>
-        : null
-      }
-      Neu:
-        <input type="text"
-               name="todoName"
-               value={ formik.values.todoName }
-               onChange={ formik.handleChange }
-               onBlur={ formik.handleBlur }/>
-      </label>
-      <button type="submit">+</button>
-    </form>
-  );
-}
-
-function NewTask4(props) {
-
-  const formik = useFormik({
-    initialValues: {
-      todoName: "",
-    },
-    validationSchema: Yup.object({
-      todoName: Yup.string().min(7,'Zu kurz').required('muss angegeben werden'),
-    }),
-    onSubmit: (values) => {
-      props.handleNewTask(values.todoName);
-    },
-  });
-
-  return (
-    <form onSubmit={ formik.handleSubmit } >
-      <label>
-      { formik.touched.todoName && formik.errors.todoName
-        ? <div class="error"> { formik.errors.todoName } </div>
-        : null
-      }
-      Neu:
-        <input { ...formik.getFieldProps('todoName') } />
-      </label>
-      <button type="submit">+</button>
-    </form>
-  );
-}
-
-function NewTask(props) {
-
-  // throw new Error('bang');
-
-  return (
-    <Formik
-      initialValues= { {
-         todoName: "",
-        }}
-      validationSchema= {
-        Yup.object({
-          todoName: Yup.string().min(7,'Zu kurz').required('muss angegeben werden'),
-        }) }
-      onSubmit= {
-        (values) => { props.handleNewTask(values.todoName); }
-      }
-    >
-    { formik => (
-        <Form>
-          <div class="error">
-            <ErrorMessage name="todoName"/>
-          </div>
-          <label htmlForm="todoName">Neu:</label>
-          <Field name="todoName" type="text" />
-          <button type="submit">+</button>
-        </Form>
-    ) }
-    </Formik>
+    <React.Fragment>
+      <h1>Dateien</h1>
+      <ul>
+        <li>Datei 1</li>
+        <li>Datei 2</li>
+        <li>Datei 3</li>
+      </ul>
+    </React.Fragment>
   );
 }
 
