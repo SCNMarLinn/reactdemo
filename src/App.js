@@ -100,6 +100,7 @@ function Planning(props) {
         <Switch>
 
           <Route path={ `${match.path}/tasks/:isDone` } children={ <FilteredTasks/> } />
+          <Route path={ `${match.path}/tasks2` } children={ <FilteredTasks2/> } />
 
           <Route path={ `${match.path}/tasks` } >
             <Tasks/>
@@ -120,6 +121,21 @@ function Planning(props) {
           </Route>
         </Switch>
       </Router>
+  );
+}
+
+function FilteredTasks2(props) {
+  const useQuery = () => { return new URLSearchParams(useLocation().search) };
+  const isDone = useQuery().get('isdone');
+
+  useEffect( () => {console.log(isDone); } );
+
+  return (
+    <React.Fragment>
+      <hr/>
+      <div> Zeige nur Aufgaben, die { isDone ? '' : 'nicht' } erledigt sind.</div>
+      <Tasks/>
+    </React.Fragment>
   );
 }
 
