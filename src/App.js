@@ -4,6 +4,7 @@ import './App.css';
 import { Tasks, NewTask, Task } from './Tasks.js';
 import Projects from './Projects.js';
 import { Button, Container, Row, Col, Nav } from 'react-bootstrap';
+import axios from 'axios';
 import {
     BrowserRouter as Router,
     Switch,
@@ -34,18 +35,27 @@ function App(props) {
               <Link to='/files'>Dateien</Link>
             </Nav.Link>
           </Nav.Item>
+          <Nav.Item>
+            <Nav.Link>
+              <Link to='/weather'>Wetter</Link>
+            </Nav.Link>
+          </Nav.Item>
         </Nav>
 
         <Switch>
           <Route path='/planning'>
             <Planning/>
           </Route>
+          <Route path='/planung'>
+            <Redirect to='/planning' />
+          </Route>
+
           <Route path='/files'>
             <Files/>
           </Route>
 
-          <Route path='/planung'>
-            <Redirect to='/planning' />
+          <Route path='/weather'>
+            <Weather/>
           </Route>
 
           <Route path='/:taskID'>
@@ -200,5 +210,27 @@ function Files(props) {
     </React.Fragment>
   );
 }
+
+function Weather(props) {
+
+  const [result,setResultOuter] = useState(null);
+
+  useEffect( () => {
+    
+    axios.get('https://api.weather.gov/points/39.7456,-97.0892')
+         .then( newResult => {
+            setResultOuter(newResult.data.properties.forecast);
+         })
+  });
+
+  return (
+    <React.Fragment>
+      <h1>Wetter</h1>
+      <div>{ result }</div>
+    </React.Fragment>
+  );
+}
+
+// besser: class Weather …
 
 export default App;
